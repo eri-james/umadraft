@@ -1,0 +1,6 @@
+{
+  "name": "Umamusume Draft & Match Director",
+  "description": "Esports tournament draft and match director suite for Umamusume: Pretty Derby, featuring track drafting with distance limits, uma snake drafting, 60-minute training timer, and live podium scoreboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
