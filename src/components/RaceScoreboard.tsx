@@ -182,6 +182,8 @@ export const RaceScoreboard: React.FC<RaceScoreboardProps> = ({
     setCurrentRoundIndex(currentRoundIndex + 1);
   };
 
+  const [recapCopied, setRecapCopied] = useState(false);
+
   const copyMatchRecap = () => {
     sound.playSelect();
     const recapText = `=== UMAMUSUME ESPORTS MATCH RECAP ===
@@ -197,7 +199,8 @@ ${completedRounds.map(r => `Round ${r.roundNumber} [${r.track.name}]:
   Score: ${team1Name} +${r.team1PointsEarned} | ${team2Name} +${r.team2PointsEarned} (Total: ${r.runningTotalTeam1} - ${r.runningTotalTeam2})`).join('\n\n')}
 `;
     navigator.clipboard.writeText(recapText);
-    alert('Match recap copied to clipboard!');
+    setRecapCopied(true);
+    setTimeout(() => setRecapCopied(false), 2500);
   };
 
   const progress1 = Math.min(100, (totalTeam1 / targetScore) * 100);
@@ -228,8 +231,8 @@ ${completedRounds.map(r => `Round ${r.roundNumber} [${r.track.name}]:
               onClick={copyMatchRecap}
               className="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold font-display uppercase tracking-wider text-sm rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer"
             >
-              <Share2 className="w-4 h-4" />
-              <span>Copy Match Recap</span>
+              {recapCopied ? <Check className="w-4 h-4 stroke-[3]" /> : <Share2 className="w-4 h-4" />}
+              <span>{recapCopied ? 'Recap Copied to Clipboard!' : 'Copy Match Recap'}</span>
             </button>
 
             <button

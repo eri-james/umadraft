@@ -42,6 +42,8 @@ export interface Umamusume {
   };
   primaryColor: string;
   rarity: 1 | 2 | 3;
+  imageUrl?: string;
+  charId?: number;
 }
 
 export type MatchPhase =

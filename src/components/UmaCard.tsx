@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Umamusume, AptitudeGrade } from '../types/draft';
 
 interface UmaCardProps {
@@ -33,6 +33,10 @@ export const UmaCard: React.FC<UmaCardProps> = ({
   onClick,
   compact = false,
 }) => {
+  const [imgError, setImgError] = useState(false);
+
+  const fallbackInitial = uma.name.charAt(0);
+
   if (compact) {
     return (
       <div
@@ -45,11 +49,25 @@ export const UmaCard: React.FC<UmaCardProps> = ({
             : 'bg-slate-950 border-slate-800 hover:border-slate-700'
         } ${onClick ? 'cursor-pointer' : ''}`}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
+          {/* Avatar Thumbnail */}
           <div
-            className="w-2.5 h-7 rounded-full shrink-0"
+            className="w-8 h-8 rounded-md shrink-0 overflow-hidden relative border border-slate-700 flex items-center justify-center font-bold text-white text-xs"
             style={{ backgroundColor: uma.primaryColor }}
-          />
+          >
+            {uma.imageUrl && !imgError ? (
+              <img
+                src={uma.imageUrl}
+                alt={uma.name}
+                referrerPolicy="no-referrer"
+                onError={() => setImgError(true)}
+                className="w-full h-full object-cover object-top"
+              />
+            ) : (
+              <span>{fallbackInitial}</span>
+            )}
+          </div>
+
           <div className="min-w-0 flex-1">
             <h5 className={`font-semibold truncate text-[11px] ${isVetoed ? 'line-through text-rose-300' : 'text-slate-200'}`}>
               {uma.name}
@@ -62,13 +80,14 @@ export const UmaCard: React.FC<UmaCardProps> = ({
               </span>
             </div>
           </div>
+
           {assignedToPlayer && (
-            <span className="px-1.5 py-0.5 bg-blue-950 text-blue-300 border border-blue-800 text-[9px] font-bold rounded">
+            <span className="px-1.5 py-0.5 bg-blue-950 text-blue-300 border border-blue-800 text-[9px] font-bold rounded shrink-0">
               {assignedToPlayer}
             </span>
           )}
           {isVetoed && (
-            <span className="px-1 py-0.5 bg-rose-600 text-white font-bold text-[8px] uppercase rounded">
+            <span className="px-1 py-0.5 bg-rose-600 text-white font-bold text-[8px] uppercase rounded shrink-0">
               VETO
             </span>
           )}
@@ -90,20 +109,43 @@ export const UmaCard: React.FC<UmaCardProps> = ({
     >
       <div className="absolute top-0 left-0 right-0 h-1" style={{ backgroundColor: uma.primaryColor }} />
 
-      <div className="space-y-1 mt-1">
-        <div className="flex items-start justify-between gap-1">
-          <h4 className="font-display font-bold text-sm text-white uppercase tracking-wide truncate">
-            {uma.name}
-          </h4>
-          <span className="text-[10px] font-mono text-slate-400 shrink-0">
-            ★{uma.rarity}
-          </span>
+      <div className="flex items-start gap-3 mt-1">
+        {/* Character Portrait Image */}
+        <div
+          className="w-13 h-13 rounded-lg shrink-0 overflow-hidden relative border border-slate-700/80 bg-slate-950 flex items-center justify-center font-bold text-white shadow-inner"
+          style={{ backgroundColor: `${uma.primaryColor}25` }}
+        >
+          {uma.imageUrl && !imgError ? (
+            <img
+              src={uma.imageUrl}
+              alt={uma.name}
+              referrerPolicy="no-referrer"
+              onError={() => setImgError(true)}
+              className="w-full h-full object-cover object-top scale-110 hover:scale-125 transition-transform duration-300"
+            />
+          ) : (
+            <span className="text-lg font-display" style={{ color: uma.primaryColor }}>
+              {fallbackInitial}
+            </span>
+          )}
         </div>
 
-        <p className="text-[10px] text-slate-400 truncate">{uma.nameJp}</p>
-        {uma.epithet && (
-          <p className="text-[9px] text-amber-400/80 italic truncate">"{uma.epithet}"</p>
-        )}
+        {/* Character Name & Epithet */}
+        <div className="min-w-0 flex-1 space-y-0.5">
+          <div className="flex items-start justify-between gap-1">
+            <h4 className="font-display font-bold text-sm text-white uppercase tracking-wide truncate">
+              {uma.name}
+            </h4>
+            <span className="text-[10px] font-mono text-slate-400 shrink-0">
+              ★{uma.rarity}
+            </span>
+          </div>
+
+          <p className="text-[10px] text-slate-400 truncate">{uma.nameJp}</p>
+          {uma.epithet && (
+            <p className="text-[9px] text-amber-400/80 italic truncate">"{uma.epithet}"</p>
+          )}
+        </div>
       </div>
 
       {/* Aptitude Matrix */}
@@ -117,7 +159,7 @@ export const UmaCard: React.FC<UmaCardProps> = ({
           <span title="Long">Lo:<strong className={GRADE_COLORS[uma.distanceAptitude.long]}>{uma.distanceAptitude.long}</strong></span>
         </div>
 
-        {/* Surfaces & Best Strategy */}
+        {/* Surfaces & Strategy */}
         <div className="flex items-center justify-between text-slate-400 font-mono-numbers pt-0.5">
           <span className="text-[9px] uppercase tracking-wider text-slate-500">Surf:</span>
           <span>T:<strong className={GRADE_COLORS[uma.surfaceAptitude.turf]}>{uma.surfaceAptitude.turf}</strong></span>
@@ -136,7 +178,7 @@ export const UmaCard: React.FC<UmaCardProps> = ({
       </div>
 
       {isBanned && (
-        <div className="absolute inset-0 bg-slate-950/80 flex items-center justify-center text-rose-500 font-bold font-display uppercase tracking-widest text-xs">
+        <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-[1px] flex items-center justify-center text-rose-500 font-bold font-display uppercase tracking-widest text-xs">
           BANNED
         </div>
       )}

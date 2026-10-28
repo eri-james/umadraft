@@ -88,6 +88,7 @@ export default function App() {
 
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [showCasterOverlay, setShowCasterOverlay] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
 
   // Sync state to local storage
   useEffect(() => {
@@ -285,12 +286,29 @@ export default function App() {
     }));
   };
 
+  // Direct reset execution
+  const executeReset = () => {
+    sound.playSelect();
+    setMatchState(INITIAL_STATE);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Ignore
+    }
+    setShowResetModal(false);
+  };
+
   // Handler: Reset to Lobby
   const handleResetMatch = () => {
-    if (window.confirm('Reset tournament match and return to Lobby Setup?')) {
-      sound.playSelect();
-      setMatchState(INITIAL_STATE);
-      localStorage.removeItem(STORAGE_KEY);
+    // If match ended or on victory screen, return directly to lobby with zero prompt
+    if (
+      matchState.phase === 'LOBBY' ||
+      matchState.phase === 'MATCH_VICTORY' ||
+      matchState.winnerTeam !== null
+    ) {
+      executeReset();
+    } else {
+      setShowResetModal(true);
     }
   };
 
@@ -467,6 +485,43 @@ export default function App() {
           allUmasMap={allUmasMap}
           onClose={() => setShowCasterOverlay(false)}
         />
+      )}
+
+      {/* In-App Reset Confirmation Modal (Replaces blocked window.confirm) */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl text-center">
+            <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto">
+              <span className="text-xl font-bold font-mono">!</span>
+            </div>
+
+            <div className="space-y-1.5">
+              <h3 className="font-display font-extrabold text-xl text-white uppercase tracking-wide">
+                Reset Tournament Match?
+              </h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Returning to Lobby will clear all current track selections, pre-bans, drafted rosters, and match scores. This cannot be undone.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowResetModal(false)}
+                className="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl border border-slate-700 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeReset}
+                className="w-full py-2.5 px-4 bg-rose-600 hover:bg-rose-500 text-white font-bold font-display uppercase tracking-wider text-xs rounded-xl shadow-lg transition-colors cursor-pointer"
+              >
+                Reset to Lobby
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
